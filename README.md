@@ -7,14 +7,14 @@ SutraChatbot est un assistant conversationnel intelligent basé sur une architec
 ## 🏗️ Architecture et Fonctionnalités
 
 - **Recherche Hybride Intelligente** : 
-  * *Extraction par expression régulière (Regex)* : Détection automatique des codes SH à 10 chiffres dans la question pour interroger directement la base tabulaire.
+  * *Extraction  : Détection automatique des codes SH à 10 chiffres dans la question pour interroger directement la base tabulaire.
   * *Recherche Sémantique Vectorielle* : Prise en charge des requêtes textuelles complexes via **ChromaDB** et les embeddings multilingues de HuggingFace.
 - **Structuration Rigoureuse des Réponses** : Le modèle formate l'expertise douanière autour de 4 champs clés :
   1. Code SH
   2. Désignation
   3. Droit d'importation
   4. Unité
-- **Interface Web Interactive** : Application **Flask** légère et intuitive intégrée avec une interface de chat (HTML/CSS/JS).
+- **Interface Web Interactive** : Application **Flask** légère et intuitive intégrée avec une interface de chat .
 
 ---
 
