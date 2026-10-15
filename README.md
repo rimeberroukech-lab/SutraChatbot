@@ -1,6 +1,6 @@
 # SutraChatbot 
 
-SutraChatbot est un assistant conversationnel intelligent basé sur une architecture RAG (Retrieval-Augmented Generation). Conçu spécifiquement pour l'écosystème douanier, il permet d'interroger et d'exploiter efficacement les documents et nomenclatures réglementaires (notamment le tarif douanier marocain) afin de fournir des réponses précises et structurées aux transitaires et professionnels.
+SutraChatbot est un assistant conversationnel intelligent basé sur une architecture RAG (Retrieval-Augmented Generation). Conçu spécifiquement pour l'écosystème douanier, il permet d'interroger et d'exploiter efficacement les documents et nomenclatures réglementaires  afin de fournir des réponses précises et structurées aux transitaires et professionnels.
 
 ---
 
