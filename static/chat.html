@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Douanier Marocain - PRIMOS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #ffffff; color: #1e1e2e; }
+
+        /* Sidebar gauche (Fond clair) */
+        .sidebar { width: 260px; background-color: #f8f9fa; padding: 15px; display: flex; flex-direction: column; border-right: 1px solid #e0e0e0; }
+        
+        /* Conteneur de la marque (Logo Violet + Titre Sombre/Noir) */
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0 15px 0;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Logo Violet */
+        .brand-logo {
+            width: 28px;
+            height: 28px;
+            fill: #8a2be2; /* Couleur Violette */
+        }
+
+        /* Titre PRIMOS en Sombre/Noir */
+        .brand-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #181825;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-new-chat { background-color: #8a2be2; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: left; margin-top: 15px; margin-bottom: 20px; transition: 0.2s; }
+        .btn-new-chat:hover { background-color: #7b1fa2; }
+        
+        .section-title { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; margin-bottom: 10px; font-weight: bold; }
+        .chat-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+        .chat-item { padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #495057; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s; }
+        .chat-item:hover, .chat-item.active { background-color: #e9ecef; color: #181825; font-weight: 600; }
+
+        /* Zone principale de Chat */
+        .main-chat { flex: 1; display: flex; flex-direction: column; height: 100vh; background-color: #ffffff; }
+        .chat-header { background-color: #ffffff; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; font-size: 1.1rem; font-weight: bold; color: #8a2be2; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #ffffff; }
+        
+        .message { padding: 12px 16px; border-radius: 10px; max-width: 70%; font-size: 0.95rem; line-height: 1.5; }
+        .user { background-color: #8a2be2; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .assistant { background-color: #f1f3f5; color: #212529; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e9ecef; }
+
+        /* Barre de saisie */
+        .chat-input { padding: 20px; background-color: #ffffff; display: flex; gap: 10px; border-top: 1px solid #e0e0e0; }
+        input { flex: 1; padding: 12px 15px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 8px; color: #212529; outline: none; font-size: 0.95rem; }
+        input:focus { border-color: #8a2be2; background-color: #ffffff; }
+        button.btn-send { background-color: #8a2be2; color: #ffffff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button.btn-send:hover { background-color: #7b1fa2; }
+
+        /* Animation de rotation pour l'étoile */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Bulle d'attente "Le chatbot pense..." */
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-style: italic;
+            color: #d97706;
+        }   
+
+        /* L'étoile dorée */
+        .star-spinner {
+            display: inline-block;
+            font-size: 1.2rem;
+            color: #d97706;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barre latérale (Sidebar) -->
+    <div class="sidebar">
+        <!-- Marque : Logo Violet + Titre Sombre -->
+        <div class="brand-container">
+            <svg class="brand-logo" viewBox="0 0 24 24">
+                <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+            </svg>
+            <span class="brand-title">PRIMOS</span>
+        </div>
+        
+        <button class="btn-new-chat" onclick="creerNouvelleDiscussion()">+ Nouvelle discussion</button>
+        <div class="section-title">Discussions Récentes</div>
+        <div class="chat-list" id="chat-list"></div>
+    </div>
+
+    <!-- Zone de Chat Principale -->
+    <div class="main-chat">
+        <div class="chat-header" id="chat-header">Nouvelle discussion</div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Poser une question douanière..." onkeypress="handleKeyPress(event)">
+            <button class="btn-send" onclick="envoyerMessage()">Envoyer</button>
+        </div>
+    </div>
+
+<script>
+    let conversations = JSON.parse(localStorage.getItem('conversations')) || [];
+    let currentChatId = null;
+
+    window.onload = function() {
+        if (conversations.length === 0) {
+            creerNouvelleDiscussion();
+        } else {
+            currentChatId = conversations[0].id;
+            rafraichirSidebar();
+            chargerDiscussion(currentChatId);
+        }
+    };
+
+    function sauvegarder() {
+        localStorage.setItem('conversations', JSON.stringify(conversations));
+    }
+
+    function creerNouvelleDiscussion() {
+        const newChat = {
+            id: Date.now().toString(),
+            titre: "Nouvelle discussion",
+            messages: []
+        };
+        conversations.unshift(newChat);
+        currentChatId = newChat.id;
+        sauvegarder();
+        rafraichirSidebar();
+        chargerDiscussion(currentChatId);
+    }
+
+    function rafraichirSidebar() {
+        const listContainer = document.getElementById("chat-list");
+        listContainer.innerHTML = "";
+
+        conversations.forEach(chat => {
+            const item = document.createElement("div");
+            item.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
+            item.textContent = chat.titre;
+            item.onclick = () => {
+                currentChatId = chat.id;
+                rafraichirSidebar();
+                chargerDiscussion(chat.id);
+            };
+            listContainer.appendChild(item);
+        });
+    }
+
+    function chargerDiscussion(id) {
+        const chat = conversations.find(c => c.id === id);
+        const chatBox = document.getElementById("chat-box");
+        const chatHeader = document.getElementById("chat-header");
+        
+        chatBox.innerHTML = "";
+        chatHeader.textContent = chat ? chat.titre : "Discussion";
+
+        if (chat && chat.messages.length > 0) {
+            chat.messages.forEach(msg => afficherMessageDansUI(msg.role, msg.content));
+        } else {
+            afficherMessageDansUI("assistant","Bonjour ! Quel tarif douanier recherchez-vous ? Vous pouvez me saisir la description d'un produit (ex: rideaux) ou directement un code douanier à 10 chiffres.");
+        }
+    }
+
+    function afficherMessageDansUI(role, texte) {
+        const chatBox = document.getElementById("chat-box");
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message", role);
+        msgDiv.textContent = texte;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function envoyerMessage() {
+        const input = document.getElementById("user-input");
+        const message = input.value.trim();
+        if (!message) return;
+
+        const currentChat = conversations.find(c => c.id === currentChatId);
+
+        if (currentChat.messages.length === 0) {
+            currentChat.titre = message.length > 25 ? message.substring(0, 25) + "..." : message;
+            rafraichirSidebar();
+            document.getElementById("chat-header").textContent = currentChat.titre;
+        }
+
+        afficherMessageDansUI("user", message);
+        currentChat.messages.push({ role: "user", content: message });
+        sauvegarder();
+        input.value = "";
+
+        const chatBox = document.getElementById("chat-box");
+        const thinkingDiv = document.createElement("div");
+        thinkingDiv.id = "thinking-indicator";
+        thinkingDiv.classList.add("message", "assistant", "thinking-indicator");
+        thinkingDiv.innerHTML = '<span class="star-spinner">★</span>';
+        chatBox.appendChild(thinkingDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: message,
+                    history: currentChat.messages
+                })
+            });
+
+            const data = await response.json();
+
+            const indicator = document.getElementById("thinking-indicator");
+            if (indicator) indicator.remove();
+
+            if (data.reponse) {
+                afficherMessageDansUI("assistant", data.reponse);
+                currentChat.messages.push({ role: "assistant", content: data.reponse });
+                sauvegarder();
+            } else if (data.erreur) {
+                afficherMessageDansUI("assistant", "Erreur : " + data.erreur);
+            }
+        } catch (err) {
+            const indicator = document.getElementById("thinking-indicator");
+            if (indicator) indicator.remove();
+            
+            afficherMessageDansUI("assistant", "Erreur de connexion serveur.");
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') envoyerMessage();
+    }
+</script>
+
+</body>
+</html>
